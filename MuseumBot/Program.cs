@@ -5,7 +5,6 @@ using Telegram.Bot.Types;
 using System.Threading.Tasks;
 using System.IO;
 
-
 namespace MuseumBot
 {
     class Program
@@ -24,10 +23,8 @@ namespace MuseumBot
             Console.ReadLine();
             _bot.StopReceiving();
         }
-        
 
-
-        private static async void BotOnCallbackQueryReceived(object sender, CallbackQueryEventArgs e)
+        private static async void BotOnCallbackQueryReceived(object sender, Telegram.Bot.Args.CallbackQueryEventArgs e)
         {
             var buttonText = e.CallbackQuery.Data;
             var chatId = e.CallbackQuery.Message.Chat.Id;
@@ -52,7 +49,7 @@ namespace MuseumBot
                     InlineKeyboardButton.WithCallbackData("Start Tour")
                 },
             });
-            await _bot.SendMessageAsync(chatId, "Welcome to the Museum Tour!", replyMarkup: keyboard);
+            await _bot.SendTextMessageAsync(chatId, "Welcome to the Museum Tour!", replyMarkup: keyboard);
         }
 
         private static async Task SendNextPage(long chatId)
@@ -60,25 +57,25 @@ namespace MuseumBot
             // Send next page of the tour
             if (_currentPage < _pages.Length)
             {
-                using (var stream = File.OpenRead(_pages[_currentPage]))
+                using (var stream = System.IO.File.OpenRead(_pages[_currentPage]))
                 {
                     await _bot.SendPhotoAsync(chatId, stream, _captions[_currentPage]);
                 }
-                await _bot.SendMessageAsync(chatId, _texts[_currentPage]);
+                await _bot.SendTextMessageAsync(chatId, _texts[_currentPage]);
                 _currentPage++;
                 if (_currentPage < _pages.Length)
                 {
-                    await _bot.SendMessageAsync(chatId, "Next", replyMarkup: new InlineKeyboardMarkup(new[]
+                    await _bot.SendTextMessageAsync(chatId, "Next", replyMarkup: new InlineKeyboardMarkup(new[]
                     {
-                        new []
-                        {
-                            InlineKeyboardButton.WithCallbackData("Next")
-                        }
-                    }));
+                    new []
+                    {
+                        InlineKeyboardButton.WithCallbackData("Next")
+                    }
+                }));
                 }
                 else
                 {
-                    await _bot.SendMessageAsync(chatId, "Tour has ended, thank you for visiting!");
+                    await _bot.SendTextMessageAsync(chatId, "Tour has ended, thank you for visiting!");
                 }
             }
         }
