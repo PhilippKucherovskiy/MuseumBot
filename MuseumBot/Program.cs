@@ -76,7 +76,7 @@ namespace MuseumBot
                 else
                 {
                     await _bot.SendTextMessageAsync(chatId, "Tour has ended, thank you for visiting!");
-                }
+                } 
             }
         }
     }
