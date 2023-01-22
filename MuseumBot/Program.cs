@@ -19,7 +19,7 @@ namespace MuseumBot
 
         static void Main(string[] args)
         {
-            _bot = new TelegramBotClient("YOUR_TOKEN_HERE");
+            _bot = new TelegramBotClient("5981544709:AAGjFu0jUn0jrYWHeR3wq4BDCmLOQus1VAo");
             _bot.OnCallbackQuery += BotOnCallbackQueryReceived;
 
             _serializer = new XmlSerializer(typeof(List<User>));
@@ -57,7 +57,41 @@ namespace MuseumBot
         private static async Task SendTour(long chatId)
         {
             // Send images and text for the tour
+            await _bot.SendPhotoAsync(chatId, "image1.jpg", "Caption 1");
+            await _bot.SendMessageAsync(chatId, "Text 1");
+            await _bot.SendPhotoAsync(chatId, "image2.jpg", "Caption 2");
+            await _bot.SendMessageAsync(chatId, "Text 2");
+            // Repeat as necessary
         }
+
+        private static async Task SignUp(long chatId)
+        {
+            // Ask for user details
+            await _bot.SendMessageAsync(chatId, "Сколько человек собирается посетить музей?");
+            var peopleCount = int.Parse(await _bot.GetCallbackQueryAsync(chatId));
+            await _bot.SendMessageAsync(chatId, "Какая дата Вашего визита в наш музей");
+            var date = DateTime.Parse(await _bot.GetCallbackQueryAsync(chatId));
+            await _bot.SendMessageAsync(chatId, "Какое время Вашего посещения?");
+            var time = TimeSpan.Parse(await _bot.GetCallbackQueryAsync(chatId));
+
+            // Add user to the list
+            _users.Add(new User { PeopleCount = peopleCount, VisitDate = date, VisitTime = time });
+            // Serialize to XML file
+            using (FileStream fs = new FileStream(_fileName, FileMode.Create))
+            {
+                _serializer.Serialize(fs, _users);
+            }
+        }
+
+        private static async Task Feedback(long chatId)
+        {
+            // Ask for feedback
+            await _bot.SendMessageAsync(chatId, "Please leave your feedback below:");
+            var feedback = await _bot.GetCallbackQueryAsync(chatId);
+            // Save feedback to a text file
+            File.WriteAllText("feedback.txt", feedback);
+        }
+
 
         private static async Task SignUp(long chatId)
         {
@@ -72,15 +106,5 @@ namespace MuseumBot
                 _serializer.Serialize(fs, _users);
             }
         }
-
-        private static async Task Feedback(long chatId)
-        {
-            // Ask for feedback
-        }
-    }
-
-    public class User
-    {
-        // Add properties for user details
     }
 }
